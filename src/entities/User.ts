@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from "typeorm";
 import { Role } from "./Role";
+import { File } from "./File";
 
 @Entity({ name: "users" })
 export class User {
@@ -38,4 +39,7 @@ export class User {
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: "role_id" })
   role: Role;
+
+  @OneToMany(() => File, (file) => file.user)
+  files: File[];
 }

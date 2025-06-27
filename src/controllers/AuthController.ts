@@ -138,7 +138,6 @@ export class AuthController {
       }
 
       const hashedPassword = await this.authService.hashPassword(password);
-      // verificar se é um admin, usuario ou department
 
       const user = await this.userService.findUserByEmail(resetToken.email);
 

@@ -13,5 +13,6 @@ declare namespace Express {
     uuidFile?: string;
     originalFilename?: string;
     documentUserId?: number;
+    file?: Express.Multer.File;
   }
 }

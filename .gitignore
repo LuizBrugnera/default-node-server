@@ -2,3 +2,7 @@ node_modules
 dist
 .env
 setup-*
+uploads/*
+!uploads/.gitkeep
+images/*
+!images/.gitkeep
