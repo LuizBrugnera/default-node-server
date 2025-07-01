@@ -38,6 +38,19 @@ export class PhotoController {
       next(err);
     }
   };
+
+  delete = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const deleted = await this.service.delete(req.params.id);
+      if (!deleted) {
+        res.status(404).json({ message: "Photo not found" });
+        return;
+      }
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  };
 }
 
 export default PhotoController;

@@ -13,5 +13,6 @@ router.post(
   controller.upload
 );
 router.get("/:id/download", authMiddleware, controller.download);
+router.delete("/:id", authMiddleware, controller.delete);
 
 export default router;
