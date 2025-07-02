@@ -16,7 +16,7 @@ export class UserService {
   findUserByEmail(email: string) {
     return this.repo.findOne({
       where: { email },
-      relations: ["role", "enrollments"],
+      relations: ["role"],
     });
   }
 

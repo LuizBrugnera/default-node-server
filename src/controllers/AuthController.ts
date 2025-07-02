@@ -43,7 +43,7 @@ export class AuthController {
     try {
       const { fullName, email, password, cpfOrCnpj, phoneNumber } = req.body;
       const hashedPassword = await this.authService.hashPassword(password);
-      const role = await this.roleService.findByName("student");
+      const role = await this.roleService.findByName("basic");
       const user = await this.userService.create({
         role,
         fullName,

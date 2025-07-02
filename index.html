@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      section {
+        margin-bottom: 2em;
+      }
+      form > input,
+      form > button {
+        margin: 3px;
+      }
+      pre {
+        background: #f5f5f5;
+        padding: 10px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Default Node Server - Teste de Rotas</h1>
+
+    <div>
+      <label
+        >Token: <input id="tokenInput" type="text" style="width: 60%"
+      /></label>
+      <button id="setTokenBtn" type="button">Definir Token</button>
+      <pre id="currentToken"></pre>
+    </div>
+
+    <section>
+      <h2>Registrar</h2>
+      <form id="registerForm">
+        <input name="fullName" placeholder="Nome Completo" required />
+        <input name="email" type="email" placeholder="Email" required />
+        <input name="password" type="password" placeholder="Senha" required />
+        <input name="cpfOrCnpj" placeholder="CPF ou CNPJ" />
+        <input name="phoneNumber" placeholder="Telefone" />
+        <button type="submit">Registrar</button>
+      </form>
+      <pre id="registerFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Login</h2>
+      <form id="loginForm">
+        <input name="email" type="email" placeholder="Email" required />
+        <input name="password" type="password" placeholder="Senha" required />
+        <button type="submit">Login</button>
+      </form>
+      <pre id="loginFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Gerar Código de Reset</h2>
+      <form id="generateCodeForm">
+        <input name="email" type="email" placeholder="Email" required />
+        <button type="submit">Gerar Código</button>
+      </form>
+      <pre id="generateCodeFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Verificar Código de Reset</h2>
+      <form id="verifyCodeForm">
+        <input name="email" type="email" placeholder="Email" required />
+        <input name="code" placeholder="Código" required />
+        <button type="submit">Verificar</button>
+      </form>
+      <pre id="verifyCodeFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Redefinir Senha</h2>
+      <form id="resetPasswordForm">
+        <input name="token" placeholder="Token" required />
+        <input
+          name="password"
+          type="password"
+          placeholder="Nova Senha"
+          required
+        />
+        <button type="submit">Redefinir</button>
+      </form>
+      <pre id="resetPasswordFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Atualizar Senha (logado)</h2>
+      <form id="updatePasswordForm">
+        <input
+          name="oldPassword"
+          type="password"
+          placeholder="Senha Atual"
+          required
+        />
+        <input
+          name="newPassword"
+          type="password"
+          placeholder="Nova Senha"
+          required
+        />
+        <button type="submit">Atualizar</button>
+      </form>
+      <pre id="updatePasswordFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Atualizar Usuário (logado)</h2>
+      <form id="updateUserForm">
+        <input name="fullName" placeholder="Nome Completo" />
+        <input name="email" type="email" placeholder="Email" />
+        <input name="cpfOrCnpj" placeholder="CPF ou CNPJ" />
+        <input name="phoneNumber" placeholder="Telefone" />
+        <button type="submit">Atualizar</button>
+      </form>
+      <pre id="updateUserFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Obter Usuário Atual (logado)</h2>
+      <form id="getMeForm">
+        <button type="submit">/users/me</button>
+      </form>
+      <pre id="getMeFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Upload de Arquivo</h2>
+      <form id="uploadFileForm">
+        <input name="file" type="file" required />
+        <button type="submit">Upload</button>
+      </form>
+      <pre id="uploadFileFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Download de Arquivo (logado)</h2>
+      <form id="downloadFileForm">
+        <input name="id" placeholder="ID do Arquivo" required />
+        <button type="submit">Download</button>
+      </form>
+      <pre id="downloadFileFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Excluir Arquivo (logado)</h2>
+      <form id="deleteFileForm">
+        <input name="id" placeholder="ID do Arquivo" required />
+        <button type="submit">Excluir</button>
+      </form>
+      <pre id="deleteFileFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Upload de Foto</h2>
+      <form id="uploadPhotoForm">
+        <input name="photo" type="file" accept="image/*" required />
+        <button type="submit">Upload</button>
+      </form>
+      <pre id="uploadPhotoFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Obter Foto</h2>
+      <form id="getPhotoForm">
+        <input name="id" placeholder="ID da Foto" required />
+        <button type="submit">Buscar</button>
+      </form>
+      <pre id="getPhotoFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Excluir Foto (logado)</h2>
+      <form id="deletePhotoForm">
+        <input name="id" placeholder="ID da Foto" required />
+        <button type="submit">Excluir</button>
+      </form>
+      <pre id="deletePhotoFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Upload de Vídeo</h2>
+      <form id="uploadVideoForm">
+        <input name="video" type="file" accept="video/*" required />
+        <button type="submit">Upload</button>
+      </form>
+      <pre id="uploadVideoFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Obter Vídeo</h2>
+      <form id="getVideoForm">
+        <input name="id" placeholder="ID do Vídeo" required />
+        <button type="submit">Buscar</button>
+      </form>
+      <pre id="getVideoFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Excluir Vídeo (logado)</h2>
+      <form id="deleteVideoForm">
+        <input name="id" placeholder="ID do Vídeo" required />
+        <button type="submit">Excluir</button>
+      </form>
+      <pre id="deleteVideoFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Health Check</h2>
+      <form id="healthCheckForm">
+        <button type="submit">/health-check</button>
+      </form>
+      <pre id="healthCheckFormResult"></pre>
+    </section>
+    <script>
+      async function fetchBlobAndShow(path, container, tag = "img") {
+        const headers = authToken
+          ? { Authorization: "Bearer " + authToken }
+          : {};
+        const res = await fetch(apiBase + path, { headers });
+
+        if (!res.ok) {
+          container.textContent = await res.text();
+          return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+
+        // limpa e insere preview
+        container.innerHTML = "";
+        if (tag === "img") {
+          const img = document.createElement("img");
+          img.src = url;
+          img.style.maxWidth = "300px";
+          container.appendChild(img);
+        } else {
+          const video = document.createElement("video");
+          video.src = url;
+          video.controls = true;
+          video.style.maxWidth = "300px";
+          container.appendChild(video);
+        }
+      }
+    </script>
+    <script>
+      const apiBase = "http://localhost:3005/api/v1";
+      let authToken = "";
+
+      const getPhotoForm = document.getElementById("getPhotoForm");
+      getPhotoForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const id = getPhotoForm.elements["id"].value.trim();
+        const result = document.getElementById("getPhotoFormResult");
+        fetchBlobAndShow("/photos/" + id, result, "img");
+      });
+
+      const getVideoForm = document.getElementById("getVideoForm");
+      getVideoForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const id = getVideoForm.elements["id"].value.trim();
+        const result = document.getElementById("getVideoFormResult");
+        fetchBlobAndShow("/videos/" + id, result, "video");
+      });
+
+      document
+        .getElementById("healthCheckForm")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          handleFetch(
+            "GET",
+            "/health-check",
+            null,
+            document.getElementById("healthCheckFormResult")
+          );
+        });
+
+      document.getElementById("setTokenBtn").addEventListener("click", () => {
+        authToken = document.getElementById("tokenInput").value.trim();
+        document.getElementById("currentToken").textContent = authToken;
+      });
+
+      function handleForm(formId, method, path, isFile = false, after) {
+        const form = document.getElementById(formId);
+        const result = document.getElementById(formId + "Result");
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const data = new FormData(form);
+
+          const headers = {};
+          if (authToken) headers["Authorization"] = "Bearer " + authToken;
+
+          const options = { method, headers };
+
+          // Só inclui body se não for GET/HEAD
+          if (method !== "GET" && method !== "HEAD") {
+            if (isFile) {
+              options.body = data;
+            } else {
+              headers["Content-Type"] = "application/json";
+              options.body = JSON.stringify(Object.fromEntries(data.entries()));
+            }
+          }
+
+          try {
+            const res = await fetch(apiBase + path, options);
+            const text = res.status === 204 ? "No Content" : await res.text();
+            result.textContent = text;
+            if (after) after(res, text);
+          } catch (err) {
+            result.textContent = err.toString();
+          }
+        });
+      }
+
+      handleForm("registerForm", "POST", "/auth/register");
+      handleForm("loginForm", "POST", "/auth/login", false, (res, text) => {
+        if (res.ok) {
+          try {
+            const data = JSON.parse(text);
+            if (data.token) {
+              authToken = data.token;
+              document.getElementById("tokenInput").value = authToken;
+              document.getElementById("currentToken").textContent = authToken;
+            }
+          } catch (e) {}
+        }
+      });
+      handleForm("generateCodeForm", "POST", "/auth/generate-code");
+      handleForm("verifyCodeForm", "POST", "/auth/verify-code");
+      handleForm("resetPasswordForm", "POST", "/auth/reset-password");
+      handleForm("updatePasswordForm", "POST", "/auth/update-password");
+      handleForm("updateUserForm", "PUT", "/users/update");
+      handleForm("getMeForm", "GET", "/users/me");
+      handleForm("uploadFileForm", "POST", "/files/upload", true);
+
+      const downloadForm = document.getElementById("downloadFileForm");
+      downloadForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = downloadForm.elements["id"].value;
+        const headers = authToken
+          ? { Authorization: "Bearer " + authToken }
+          : {};
+        const res = await fetch(apiBase + "/files/" + id + "/download", {
+          headers,
+        });
+        if (!res.ok) {
+          document.getElementById("downloadFileFormResult").textContent =
+            await res.text();
+          return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("downloadFileFormResult").textContent =
+          "Download iniciado";
+      });
+
+      function handleFetch(method, path, body, resultEl) {
+        const headers = {};
+        if (authToken) headers["Authorization"] = "Bearer " + authToken;
+
+        const opts = { method, headers };
+
+        // Só envia body se o método permitir
+        if (body && method !== "GET" && method !== "HEAD") {
+          if (!(body instanceof FormData)) {
+            headers["Content-Type"] = "application/json";
+          }
+          opts.body = body;
+        }
+
+        fetch(apiBase + path, opts)
+          .then(async (r) => {
+            resultEl.textContent =
+              r.status === 204 ? "No Content" : await r.text();
+          })
+          .catch((err) => (resultEl.textContent = err.toString()));
+      }
+
+      function attachDynamicForm(formId, method, urlBuilder, isFile = false) {
+        const form = document.getElementById(formId);
+        const result = document.getElementById(formId + "Result");
+
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          // Se existir input name="id", usa; senão mantém null/undefined
+          const idInput = form.elements.namedItem("id");
+          const id = idInput ? idInput.value.trim() : undefined;
+
+          const data = new FormData(form);
+
+          if (isFile) {
+            handleFetch(method, urlBuilder(id), data, result);
+          } else {
+            const obj = {};
+            data.forEach((v, k) => {
+              if (k !== "id") obj[k] = v;
+            });
+            handleFetch(method, urlBuilder(id), JSON.stringify(obj), result);
+          }
+        });
+      }
+
+      attachDynamicForm("deleteFileForm", "DELETE", (id) => "/files/" + id);
+      //attachDynamicForm("getPhotoForm", "GET", (id) => "/photos/" + id);
+      attachDynamicForm("deletePhotoForm", "DELETE", (id) => "/photos/" + id);
+      attachDynamicForm(
+        "uploadPhotoForm",
+        "POST",
+        () => "/photos/upload",
+        true
+      );
+      attachDynamicForm(
+        "uploadVideoForm",
+        "POST",
+        () => "/videos/upload",
+        true
+      );
+      attachDynamicForm("getVideoForm", "GET", (id) => "/videos/" + id);
+      attachDynamicForm("deleteVideoForm", "DELETE", (id) => "/videos/" + id);
+      attachDynamicForm("healthCheckForm", "GET", () => "/health-check");
+    </script>
+  </body>
+</html>
