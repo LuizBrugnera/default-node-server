@@ -15,5 +15,10 @@ router.post(
   authMiddleware,
   controller.updatePasswordWithPassword
 );
+router.post(
+  "/update-email",
+  authMiddleware,
+  controller.updateEmailWithPassword
+);
 
 export default router;

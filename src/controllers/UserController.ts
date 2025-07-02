@@ -63,7 +63,6 @@ export class UserController {
 
       const data = {
         fullName: req.body.fullName || user.fullName,
-        email: req.body.email || user.email,
         cpfOrCnpj: req.body.cpfOrCnpj || user.cpfOrCnpj,
         phoneNumber: req.body.phoneNumber || user.phoneNumber,
       };

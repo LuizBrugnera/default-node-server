@@ -199,6 +199,45 @@ export class AuthController {
       return;
     }
   };
+
+  updateEmailWithPassword = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { password, newEmail } = req.body;
+
+      if (!req.user) {
+        res.status(400).send("User not found.");
+        return;
+      }
+
+      const userExists = await this.userService.findUserByEmail(newEmail);
+
+      if (userExists) {
+        res.status(400).send("Email já cadastrado.");
+        return;
+      }
+
+      const validPassword = await this.authService.verifyPassword(
+        password,
+        userExists.passwordHash
+      );
+
+      if (!validPassword) {
+        res.status(400).send("Invalid password.");
+        return;
+      }
+
+      await this.userService.update(req.user.id, { email: newEmail });
+
+      res.status(200).send("Email updated successfully.");
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Erro ao atualizar email.");
+      return;
+    }
+  };
 }
 
 export default AuthController;
