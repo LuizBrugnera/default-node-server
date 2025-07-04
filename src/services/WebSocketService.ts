@@ -1,4 +1,4 @@
-import { Server as SocketIOServer } from "socket.io";
+import { Socket, Server as SocketIOServer } from "socket.io";
 import { Server as HTTPServer } from "http";
 import jwt from "jsonwebtoken";
 import { AppDataSource } from "../data-source";
@@ -20,8 +20,8 @@ export class WebSocketService {
     this.io = new SocketIOServer(server, {
       cors: {
         origin: process.env.FRONTEND_URL || "*",
-        methods: ["GET", "POST"]
-      }
+        methods: ["GET", "POST"],
+      },
     });
 
     this.setupMiddleware();
@@ -36,7 +36,10 @@ export class WebSocketService {
           return next(new Error("Authentication error"));
         }
 
-        const decoded = jwt.verify(token, process.env.SECRET_KEY as string) as any;
+        const decoded = jwt.verify(
+          token,
+          process.env.SECRET_KEY as string
+        ) as any;
         socket.userId = decoded.id;
         socket.userRole = decoded.role;
         next();
@@ -51,7 +54,11 @@ export class WebSocketService {
       console.log(`User ${socket.userId} connected`);
 
       // Update user status to online
-      await this.updateUserStatus(socket.userId!, OnlineStatus.ONLINE, socket.id);
+      await this.updateUserStatus(
+        socket.userId!,
+        OnlineStatus.ONLINE,
+        socket.id
+      );
 
       // Join user to their personal room
       socket.join(`user_${socket.userId}`);
@@ -62,19 +69,19 @@ export class WebSocketService {
       });
 
       // Handle real-time messaging
-      socket.on("send_message", async (data: {
-        ticketId: string;
-        message: string;
-      }) => {
-        // Broadcast message to ticket room
-        socket.to(`ticket_${data.ticketId}`).emit("new_message", {
-          ticketId: data.ticketId,
-          message: data.message,
-          senderId: socket.userId,
-          timestamp: new Date(),
-          isAdminMessage: socket.userRole === "admin"
-        });
-      });
+      socket.on(
+        "send_message",
+        async (data: { ticketId: string; message: string }) => {
+          // Broadcast message to ticket room
+          socket.to(`ticket_${data.ticketId}`).emit("new_message", {
+            ticketId: data.ticketId,
+            message: data.message,
+            senderId: socket.userId,
+            timestamp: new Date(),
+            isAdminMessage: socket.userRole === "admin",
+          });
+        }
+      );
 
       // Handle typing indicators
       socket.on("typing_start", (ticketId: string) => {
@@ -82,10 +89,10 @@ export class WebSocketService {
           this.typingUsers.set(ticketId, new Set());
         }
         this.typingUsers.get(ticketId)!.add(socket.userId!);
-        
+
         socket.to(`ticket_${ticketId}`).emit("user_typing", {
           userId: socket.userId,
-          ticketId
+          ticketId,
         });
       });
 
@@ -93,10 +100,10 @@ export class WebSocketService {
         if (this.typingUsers.has(ticketId)) {
           this.typingUsers.get(ticketId)!.delete(socket.userId!);
         }
-        
+
         socket.to(`ticket_${ticketId}`).emit("user_stopped_typing", {
           userId: socket.userId,
-          ticketId
+          ticketId,
         });
       });
 
@@ -104,14 +111,14 @@ export class WebSocketService {
       socket.on("disconnect", async () => {
         console.log(`User ${socket.userId} disconnected`);
         await this.updateUserStatus(socket.userId!, OnlineStatus.OFFLINE);
-        
+
         // Clean up typing indicators
         this.typingUsers.forEach((users, ticketId) => {
           if (users.has(socket.userId!)) {
             users.delete(socket.userId!);
             socket.to(`ticket_${ticketId}`).emit("user_stopped_typing", {
               userId: socket.userId,
-              ticketId
+              ticketId,
             });
           }
         });
@@ -119,15 +126,19 @@ export class WebSocketService {
     });
   }
 
-  private async updateUserStatus(userId: string, status: OnlineStatus, socketId?: string) {
+  private async updateUserStatus(
+    userId: string,
+    status: OnlineStatus,
+    socketId?: string
+  ) {
     let userStatus = await this.userStatusRepo.findOne({ where: { userId } });
-    
+
     if (!userStatus) {
       userStatus = this.userStatusRepo.create({
         userId,
         status,
         socketId: socketId || null,
-        lastSeen: status === OnlineStatus.OFFLINE ? new Date() : null
+        lastSeen: status === OnlineStatus.OFFLINE ? new Date() : null,
       });
     } else {
       userStatus.status = status;
