@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { Role } from "./Role";
 import { File } from "./File";
+import { SupportTicket } from "./SupportTicket";
 
 @Entity({ name: "users" })
 export class User {
@@ -42,4 +43,10 @@ export class User {
 
   @OneToMany(() => File, (file) => file.user)
   files: File[];
+
+  @OneToMany(() => SupportTicket, (ticket) => ticket.user)
+  supportTickets: SupportTicket[];
+
+  @OneToMany(() => SupportTicket, (ticket) => ticket.assignedAdmin)
+  assignedTickets: SupportTicket[];
 }

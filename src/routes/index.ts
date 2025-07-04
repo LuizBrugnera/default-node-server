@@ -4,6 +4,8 @@ import AuthRoutes from "./AuthRoutes";
 import FileRoutes from "./FileRoutes";
 import PhotoRoutes from "./PhotoRoutes";
 import VideoRoutes from "./VideoRoutes";
+import SupportRoutes from "./SupportRoutes";
+import SupportMessageRoutes from "./SupportMessageRoutes";
 
 const router = Router();
 
@@ -17,5 +19,7 @@ router.use("/auth", AuthRoutes);
 router.use("/files", FileRoutes);
 router.use("/photos", PhotoRoutes);
 router.use("/videos", VideoRoutes);
+router.use("/support", SupportRoutes);
+router.use("/support", SupportMessageRoutes);
 
 export default router;

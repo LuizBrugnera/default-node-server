@@ -219,6 +219,117 @@
       </form>
       <pre id="healthCheckFormResult"></pre>
     </section>
+
+    <!-- SUPORTE -->
+    <section>
+      <h2>Criar Ticket de Suporte</h2>
+      <form id="createTicketForm">
+        <input name="subject" placeholder="Assunto" required />
+        <textarea name="description" placeholder="Descrição" required></textarea>
+        <select name="priority">
+          <option value="low">Baixa</option>
+          <option value="medium" selected>Média</option>
+          <option value="high">Alta</option>
+          <option value="urgent">Urgente</option>
+        </select>
+        <button type="submit">Criar Ticket</button>
+      </form>
+      <pre id="createTicketFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Meus Tickets</h2>
+      <form id="myTicketsForm">
+        <button type="submit">Ver Meus Tickets</button>
+      </form>
+      <pre id="myTicketsFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Todos os Tickets (Admin)</h2>
+      <form id="allTicketsForm">
+        <button type="submit">Ver Todos os Tickets</button>
+      </form>
+      <pre id="allTicketsFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Ver Ticket Específico</h2>
+      <form id="getTicketForm">
+        <input name="id" placeholder="ID do Ticket" required />
+        <button type="submit">Ver Ticket</button>
+      </form>
+      <pre id="getTicketFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Atualizar Ticket (Admin)</h2>
+      <form id="updateTicketForm">
+        <input name="id" placeholder="ID do Ticket" required />
+        <select name="status">
+          <option value="open">Aberto</option>
+          <option value="in_progress">Em Progresso</option>
+          <option value="resolved">Resolvido</option>
+          <option value="closed">Fechado</option>
+        </select>
+        <input name="assignedAdminId" placeholder="ID do Admin" />
+        <select name="priority">
+          <option value="low">Baixa</option>
+          <option value="medium">Média</option>
+          <option value="high">Alta</option>
+          <option value="urgent">Urgente</option>
+        </select>
+        <button type="submit">Atualizar</button>
+      </form>
+      <pre id="updateTicketFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Excluir Ticket (Admin)</h2>
+      <form id="deleteTicketForm">
+        <input name="id" placeholder="ID do Ticket" required />
+        <button type="submit">Excluir</button>
+      </form>
+      <pre id="deleteTicketFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Ver Mensagens do Ticket</h2>
+      <form id="getMessagesForm">
+        <input name="ticketId" placeholder="ID do Ticket" required />
+        <button type="submit">Ver Mensagens</button>
+      </form>
+      <pre id="getMessagesFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Enviar Mensagem</h2>
+      <form id="sendMessageForm">
+        <input name="ticketId" placeholder="ID do Ticket" required />
+        <textarea name="message" placeholder="Mensagem" required></textarea>
+        <button type="submit">Enviar</button>
+      </form>
+      <pre id="sendMessageFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Editar Mensagem</h2>
+      <form id="editMessageForm">
+        <input name="id" placeholder="ID da Mensagem" required />
+        <textarea name="message" placeholder="Nova Mensagem" required></textarea>
+        <button type="submit">Editar</button>
+      </form>
+      <pre id="editMessageFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Excluir Mensagem</h2>
+      <form id="deleteMessageForm">
+        <input name="id" placeholder="ID da Mensagem" required />
+        <button type="submit">Excluir</button>
+      </form>
+      <pre id="deleteMessageFormResult"></pre>
+    </section>
     <script>
       async function fetchBlobAndShow(path, container, tag = "img") {
         const headers = authToken
@@ -397,20 +508,21 @@
         form.addEventListener("submit", (e) => {
           e.preventDefault();
 
-          // Se existir input name="id", usa; senão mantém null/undefined
-          const idInput = form.elements.namedItem("id");
-          const id = idInput ? idInput.value.trim() : undefined;
-
           const data = new FormData(form);
+          
+          // Captura id ou ticketId
+          const idInput = form.elements.namedItem("id");
+          const ticketIdInput = form.elements.namedItem("ticketId");
+          const paramValue = idInput ? idInput.value.trim() : (ticketIdInput ? ticketIdInput.value.trim() : undefined);
 
           if (isFile) {
-            handleFetch(method, urlBuilder(id), data, result);
+            handleFetch(method, urlBuilder(paramValue), data, result);
           } else {
             const obj = {};
             data.forEach((v, k) => {
-              if (k !== "id") obj[k] = v;
+              if (k !== "id" && k !== "ticketId") obj[k] = v;
             });
-            handleFetch(method, urlBuilder(id), JSON.stringify(obj), result);
+            handleFetch(method, urlBuilder(paramValue), JSON.stringify(obj), result);
           }
         });
       }
@@ -433,6 +545,20 @@
       attachDynamicForm("getVideoForm", "GET", (id) => "/videos/" + id);
       attachDynamicForm("deleteVideoForm", "DELETE", (id) => "/videos/" + id);
       attachDynamicForm("healthCheckForm", "GET", () => "/health-check");
+
+      // SUPORTE
+      handleForm("createTicketForm", "POST", "/support/tickets");
+      handleForm("myTicketsForm", "GET", "/support/my-tickets");
+      handleForm("allTicketsForm", "GET", "/support/tickets");
+      attachDynamicForm("getTicketForm", "GET", (id) => "/support/tickets/" + id);
+      attachDynamicForm("updateTicketForm", "PUT", (id) => "/support/tickets/" + id);
+      attachDynamicForm("deleteTicketForm", "DELETE", (id) => "/support/tickets/" + id);
+      
+      // MENSAGENS
+      attachDynamicForm("getMessagesForm", "GET", (ticketId) => "/support/tickets/" + ticketId + "/messages");
+      attachDynamicForm("sendMessageForm", "POST", (ticketId) => "/support/tickets/" + ticketId + "/messages");
+      attachDynamicForm("editMessageForm", "PUT", (id) => "/support/messages/" + id);
+      attachDynamicForm("deleteMessageForm", "DELETE", (id) => "/support/messages/" + id);
     </script>
   </body>
 </html>
