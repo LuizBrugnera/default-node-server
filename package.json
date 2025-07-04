@@ -10,7 +10,8 @@
     "migration:generate": "npm run typeorm migration:generate -- -d src/data-source.ts",
     "migration:run": "npm run typeorm migration:run -- -d src/data-source.ts",
     "migration:revert": "npm run typeorm migration:revert -- -d src/data-source.ts",
-    "seed": "npx ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:run"
+    "seed": "npx ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:run",
+    "backup": "npx ts-node -e \"import('./src/services/BackupService').then(m => new m.BackupService().createDatabaseBackup())\""
   },
   "keywords": [],
   "author": "",

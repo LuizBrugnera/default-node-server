@@ -5,6 +5,7 @@ import { RoleService } from "../services/RoleService";
 import { resetCodes, resetTokens } from "../cache/resetPasswordCaches";
 import { EmailHelper } from "../email/EmailService";
 import { resetCodeMailOptions } from "../email/EmailData";
+import { EmailTemplates } from "../email/EmailTemplates";
 
 export class AuthController {
   private userService = new UserService();
@@ -33,6 +34,10 @@ export class AuthController {
         role: user.role.name,
         email: user.email,
       });
+      
+      // Log login audit
+      await this.authService.logLogin(user.id, req);
+      
       res.json({ token });
     } catch (error) {
       next(error);
@@ -52,6 +57,21 @@ export class AuthController {
         cpfOrCnpj,
         phoneNumber,
       });
+      
+      // Log registration audit and send welcome email
+      await this.authService.logRegistration(user.id, req);
+      
+      try {
+        const welcomeTemplate = EmailTemplates.welcome(fullName);
+        await EmailHelper.sendMail({
+          to: email,
+          subject: welcomeTemplate.subject,
+          html: welcomeTemplate.html
+        });
+      } catch (emailError) {
+        console.log('Failed to send welcome email:', emailError);
+      }
+      
       res.json(user);
     } catch (error) {
       next(error);
@@ -74,11 +94,11 @@ export class AuthController {
     resetCodes.set(email, { code, expiresAt });
 
     try {
+      const resetTemplate = EmailTemplates.passwordReset(code, userExists.fullName);
       await EmailHelper.sendMail({
         to: email,
-        subject: "Password Reset Code",
-        text: resetCodeMailOptions.text(code),
-        html: resetCodeMailOptions.html(code),
+        subject: resetTemplate.subject,
+        html: resetTemplate.html
       });
 
       res

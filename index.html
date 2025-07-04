@@ -330,6 +330,119 @@
       </form>
       <pre id="deleteMessageFormResult"></pre>
     </section>
+
+    <!-- NOTIFICAÇÕES -->
+    <section>
+      <h2>Minhas Notificações</h2>
+      <form id="getNotificationsForm">
+        <label>
+          <input type="checkbox" name="unread" /> Apenas não lidas
+        </label>
+        <button type="submit">Ver Notificações</button>
+      </form>
+      <pre id="getNotificationsFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Contador de Não Lidas</h2>
+      <form id="getUnreadCountForm">
+        <button type="submit">Ver Contador</button>
+      </form>
+      <pre id="getUnreadCountFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Marcar Notificação como Lida</h2>
+      <form id="markReadForm">
+        <input name="id" placeholder="ID da Notificação" required />
+        <button type="submit">Marcar como Lida</button>
+      </form>
+      <pre id="markReadFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Marcar Todas como Lidas</h2>
+      <form id="markAllReadForm">
+        <button type="submit">Marcar Todas</button>
+      </form>
+      <pre id="markAllReadFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Excluir Notificação</h2>
+      <form id="deleteNotificationForm">
+        <input name="id" placeholder="ID da Notificação" required />
+        <button type="submit">Excluir</button>
+      </form>
+      <pre id="deleteNotificationFormResult"></pre>
+    </section>
+
+    <!-- BACKUP & EXPORT -->
+    <section>
+      <h2>Backup do Banco (Admin)</h2>
+      <form id="createBackupForm">
+        <button type="submit">Criar Backup</button>
+      </form>
+      <pre id="createBackupFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Exportar Meus Dados</h2>
+      <form id="exportUserDataForm">
+        <button type="submit">Exportar</button>
+      </form>
+      <pre id="exportUserDataFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Exportar Todos os Dados (Admin)</h2>
+      <form id="exportAllDataForm">
+        <button type="submit">Exportar Tudo</button>
+      </form>
+      <pre id="exportAllDataFormResult"></pre>
+    </section>
+
+    <!-- STATUS -->
+    <section>
+      <h2>Status do Usuário</h2>
+      <form id="getUserStatusForm">
+        <input name="userId" placeholder="ID do Usuário" required />
+        <button type="submit">Ver Status</button>
+      </form>
+      <pre id="getUserStatusFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Usuários Online</h2>
+      <form id="getOnlineUsersForm">
+        <button type="submit">Ver Online</button>
+      </form>
+      <pre id="getOnlineUsersFormResult"></pre>
+    </section>
+
+    <section>
+      <h2>Atualizar Meu Status</h2>
+      <form id="updateStatusForm">
+        <select name="status">
+          <option value="online">Online</option>
+          <option value="away">Ausente</option>
+          <option value="offline">Offline</option>
+        </select>
+        <button type="submit">Atualizar</button>
+      </form>
+      <pre id="updateStatusFormResult"></pre>
+    </section>
+
+    <div style="margin-top: 30px; padding: 20px; background: #f0f8ff; border-radius: 5px;">
+      <h3>🚀 Real-time Features</h3>
+      <p>Para testar funcionalidades em tempo real (WebSocket), abra: <a href="websocket-test.html" target="_blank">websocket-test.html</a></p>
+      <ul>
+        <li>Chat em tempo real</li>
+        <li>Notificações push</li>
+        <li>Status online/offline</li>
+        <li>Indicadores de digitação</li>
+      </ul>
+    </div>
     <script>
       async function fetchBlobAndShow(path, container, tag = "img") {
         const headers = authToken
@@ -559,6 +672,29 @@
       attachDynamicForm("sendMessageForm", "POST", (ticketId) => "/support/tickets/" + ticketId + "/messages");
       attachDynamicForm("editMessageForm", "PUT", (id) => "/support/messages/" + id);
       attachDynamicForm("deleteMessageForm", "DELETE", (id) => "/support/messages/" + id);
+      
+      // NOTIFICAÇÕES
+      document.getElementById("getNotificationsForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const unread = document.querySelector('input[name="unread"]').checked;
+        const url = unread ? "/notifications?unread=true" : "/notifications";
+        handleFetch("GET", url, null, document.getElementById("getNotificationsFormResult"));
+      });
+      
+      handleForm("getUnreadCountForm", "GET", "/notifications/unread-count");
+      attachDynamicForm("markReadForm", "PUT", (id) => "/notifications/" + id + "/read");
+      handleForm("markAllReadForm", "PUT", "/notifications/mark-all-read");
+      attachDynamicForm("deleteNotificationForm", "DELETE", (id) => "/notifications/" + id);
+      
+      // BACKUP & EXPORT
+      handleForm("createBackupForm", "POST", "/backup/database");
+      handleForm("exportUserDataForm", "GET", "/backup/user-data");
+      handleForm("exportAllDataForm", "POST", "/backup/export-all");
+      
+      // STATUS
+      attachDynamicForm("getUserStatusForm", "GET", (userId) => "/status/user/" + userId);
+      handleForm("getOnlineUsersForm", "GET", "/status/online");
+      handleForm("updateStatusForm", "PUT", "/status/update");
     </script>
   </body>
 </html>

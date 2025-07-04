@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; }
+        input, button, textarea { margin: 5px; padding: 8px; }
+        .messages { height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; }
+        .message { margin: 5px 0; padding: 5px; background: #f5f5f5; }
+        .typing { font-style: italic; color: #666; }
+        .online-users { background: #e8f5e8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WebSocket Real-time Features Test</h1>
+        
+        <div class="section">
+            <h3>Connection</h3>
+            <input id="tokenInput" type="text" placeholder="JWT Token" style="width: 60%">
+            <button onclick="connect()">Connect</button>
+            <button onclick="disconnect()">Disconnect</button>
+            <div id="connectionStatus">Disconnected</div>
+        </div>
+
+        <div class="section">
+            <h3>Real-time Chat</h3>
+            <input id="ticketIdInput" type="text" placeholder="Ticket ID">
+            <button onclick="joinTicket()">Join Ticket</button>
+            <div class="messages" id="messages"></div>
+            <textarea id="messageInput" placeholder="Type your message..."></textarea>
+            <button onclick="sendMessage()">Send</button>
+            <div class="typing" id="typingIndicator"></div>
+        </div>
+
+        <div class="section">
+            <h3>Online Status</h3>
+            <button onclick="setOnline()">Set Online</button>
+            <button onclick="setAway()">Set Away</button>
+            <button onclick="setOffline()">Set Offline</button>
+            <div class="online-users" id="onlineUsers"></div>
+        </div>
+
+        <div class="section">
+            <h3>Real-time Notifications</h3>
+            <div id="notifications"></div>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        let currentTicketId = null;
+        let typingTimer = null;
+
+        function connect() {
+            const token = document.getElementById('tokenInput').value;
+            if (!token) {
+                alert('Please enter a JWT token');
+                return;
+            }
+
+            socket = io('http://localhost:3005', {
+                auth: { token }
+            });
+
+            socket.on('connect', () => {
+                document.getElementById('connectionStatus').textContent = 'Connected';
+                console.log('Connected to WebSocket');
+            });
+
+            socket.on('disconnect', () => {
+                document.getElementById('connectionStatus').textContent = 'Disconnected';
+                console.log('Disconnected from WebSocket');
+            });
+
+            // Real-time messaging
+            socket.on('new_message', (data) => {
+                addMessage(`${data.isAdminMessage ? 'Admin' : 'User'}: ${data.message}`);
+            });
+
+            // Typing indicators
+            socket.on('user_typing', (data) => {
+                document.getElementById('typingIndicator').textContent = `User ${data.userId} is typing...`;
+            });
+
+            socket.on('user_stopped_typing', (data) => {
+                document.getElementById('typingIndicator').textContent = '';
+            });
+
+            // Real-time notifications
+            socket.on('notification', (notification) => {
+                addNotification(notification);
+            });
+
+            socket.on('connect_error', (error) => {
+                console.error('Connection error:', error);
+                document.getElementById('connectionStatus').textContent = 'Connection Error';
+            });
+        }
+
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+        }
+
+        function joinTicket() {
+            const ticketId = document.getElementById('ticketIdInput').value;
+            if (!ticketId || !socket) return;
+
+            currentTicketId = ticketId;
+            socket.emit('join_ticket', ticketId);
+            addMessage(`Joined ticket ${ticketId}`);
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value;
+            if (!message || !currentTicketId || !socket) return;
+
+            socket.emit('send_message', {
+                ticketId: currentTicketId,
+                message: message
+            });
+
+            addMessage(`You: ${message}`);
+            document.getElementById('messageInput').value = '';
+        }
+
+        function addMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addNotification(notification) {
+            const notificationsDiv = document.getElementById('notifications');
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = 'message';
+            notificationDiv.innerHTML = `
+                <strong>${notification.title}</strong><br>
+                ${notification.message}<br>
+                <small>${new Date().toLocaleTimeString()}</small>
+            `;
+            notificationsDiv.appendChild(notificationDiv);
+        }
+
+        // Typing indicators
+        document.getElementById('messageInput').addEventListener('input', () => {
+            if (!socket || !currentTicketId) return;
+
+            socket.emit('typing_start', currentTicketId);
+            
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                socket.emit('typing_stop', currentTicketId);
+            }, 1000);
+        });
+
+        // Status functions
+        function setOnline() {
+            updateStatus('online');
+        }
+
+        function setAway() {
+            updateStatus('away');
+        }
+
+        function setOffline() {
+            updateStatus('offline');
+        }
+
+        async function updateStatus(status) {
+            const token = document.getElementById('tokenInput').value;
+            try {
+                const response = await fetch('http://localhost:3005/api/v1/status/update', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+                
+                if (response.ok) {
+                    console.log(`Status updated to ${status}`);
+                    loadOnlineUsers();
+                }
+            } catch (error) {
+                console.error('Failed to update status:', error);
+            }
+        }
+
+        async function loadOnlineUsers() {
+            const token = document.getElementById('tokenInput').value;
+            try {
+                const response = await fetch('http://localhost:3005/api/v1/status/online', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    const onlineUsersDiv = document.getElementById('onlineUsers');
+                    onlineUsersDiv.innerHTML = '<h4>Online Users:</h4>' + 
+                        users.map(u => `<div>${u.user.fullName} (${u.status})</div>`).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load online users:', error);
+            }
+        }
+    </script>
+</body>
+</html>

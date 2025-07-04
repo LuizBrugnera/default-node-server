@@ -2,11 +2,18 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import routes from "./routes";
 import { resolve } from "path";
+import { loggingMiddleware } from "./middlewares/loggingMiddleware";
 
 const app = express();
 
 // ─── Middlewares ────────────────────────────────────────────────────────
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "*",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+app.use(loggingMiddleware);
 app.use(express.json());
 app.use("/images", express.static(resolve("images")));
 

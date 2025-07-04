@@ -10,6 +10,7 @@ import {
 import { Role } from "./Role";
 import { File } from "./File";
 import { SupportTicket } from "./SupportTicket";
+import { Notification } from "./Notification";
 
 @Entity({ name: "users" })
 export class User {
@@ -49,4 +50,7 @@ export class User {
 
   @OneToMany(() => SupportTicket, (ticket) => ticket.assignedAdmin)
   assignedTickets: SupportTicket[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
 }

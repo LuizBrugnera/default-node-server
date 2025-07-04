@@ -6,6 +6,9 @@ import PhotoRoutes from "./PhotoRoutes";
 import VideoRoutes from "./VideoRoutes";
 import SupportRoutes from "./SupportRoutes";
 import SupportMessageRoutes from "./SupportMessageRoutes";
+import NotificationRoutes from "./NotificationRoutes";
+import BackupRoutes from "./BackupRoutes";
+import StatusRoutes from "./StatusRoutes";
 
 const router = Router();
 
@@ -21,5 +24,8 @@ router.use("/photos", PhotoRoutes);
 router.use("/videos", VideoRoutes);
 router.use("/support", SupportRoutes);
 router.use("/support", SupportMessageRoutes);
+router.use("/notifications", NotificationRoutes);
+router.use("/backup", BackupRoutes);
+router.use("/status", StatusRoutes);
 
 export default router;
